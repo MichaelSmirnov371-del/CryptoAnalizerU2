@@ -7,8 +7,17 @@ target/
 .idea/
 
 
+
 ### Mac OS ###
 .DS_Store
 
 ### Demo result ###
 /text/*.txt
+analyzed.txt
+bruteforce.txt
+decrypted.txt
+encrypted.txt
+
+### GigaCode and GigaIDE ###
+.gigacode/
+.gigaide/

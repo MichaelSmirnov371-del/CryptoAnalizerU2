@@ -18,36 +18,40 @@ public class BruteForce extends AbstractAction {
         String encryptedFilename = parameters[0];
         String decryptedFilename = parameters[1];
         int bestKey = 0;
-        int bestSpaceCount = 0;
-        char space = ' ';
+        int maxSpaces = -1;
+
         for (int key = 0; key < Alphabet.chars.length; key++) {
-            int spaceCount = countCharInFileWithKey(encryptedFilename, key, space);
-            if (spaceCount > bestSpaceCount) {
-                bestSpaceCount = spaceCount;
+            int spaceCount = countSpacesInDecryptedFile(encryptedFilename, key);
+            if (spaceCount > maxSpaces) {
+                maxSpaces = spaceCount;
                 bestKey = key;
             }
         }
+
         return copyWithKey(encryptedFilename, decryptedFilename, bestKey);
     }
 
-    private int countCharInFileWithKey(String encryptedFilename, int key, char fixChar) {
-        int spaceCount = 0;
-        Path path = PathBuilder.get(encryptedFilename);
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            int value;
-            while ((value = reader.read()) > -1) {
-                char character = (char) value;
-                if (Alphabet.index.containsKey(character)) {
-                    int index = Alphabet.index.get(character);
-                    index = (index + key + Alphabet.chars.length) % Alphabet.chars.length;
-                    if (Alphabet.chars[index] == fixChar) {
-                        spaceCount++;
+    private int countSpacesInDecryptedFile(String filename, int key) {
+        char targetChar = ' ';
+        int spaceCounter = 0;
+        Path filePath = PathBuilder.get(filename);
+
+        try (BufferedReader reader = Files.newBufferedReader(filePath)) {
+            int codePoint;
+            while ((codePoint = reader.read()) != -1) {
+                char currentChar = (char) codePoint;
+                if (Alphabet.index.containsKey(currentChar)) {
+                    int originalIndex = Alphabet.index.get(currentChar);
+                    int decryptedIndex = (originalIndex + key) % Alphabet.chars.length;
+                    if (Alphabet.chars[decryptedIndex] == targetChar) {
+                        spaceCounter++;
                     }
                 }
             }
         } catch (IOException e) {
-            throw new AppException(Const.INCORRECT_FILE + encryptedFilename, e);
+            throw new AppException(Const.INCORRECT_FILE + filename, e);
         }
-        return spaceCount;
+
+        return spaceCounter;
     }
 }
